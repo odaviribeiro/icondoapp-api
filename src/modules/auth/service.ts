@@ -23,14 +23,6 @@ export async function createUser({
   const hashed = await argon2.hash(password)
   const dateOfBirth = new Date(birthDate)
 
-  console.log('Data services: ', {
-    name,
-    email,
-    password,
-    acceptedTerms,
-    birthDate: dateOfBirth,
-    phone,
-  })
   await database.insert(users).values({
     name: name,
     email: email,

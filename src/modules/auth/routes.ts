@@ -10,7 +10,7 @@ const auth = new Hono()
 auth.post('/signup', async c => {
   const json = await c.req.json()
   const result = SignUpSchema.safeParse(json)
-  console.log('Coe: ', { json, result: !result.success })
+
   if (!result.success) {
     return c.json({ errors: z.treeifyError(result.error) }, 400)
   }

@@ -21,7 +21,6 @@ export async function createUser(dto: SignUpDTO): Promise<GlobalResponse<SignUpD
     return {
       success: false,
       error: 'User exists',
-      data: null,
     }
   }
 
@@ -118,7 +117,7 @@ export async function refreshTokenService(
       where: eq(refreshTokens.token, token),
     })
 
-    if (!stored) return { success: false, error: 'Refresh token inválido', data: null }
+    if (!stored) return { success: false, error: 'Refresh token inválido' }
 
     const user = await db.query.users.findFirst({
       where: eq(users.id, userId),
@@ -161,7 +160,7 @@ export async function meService(token: string): Promise<GlobalResponse<MeData>> 
       },
     }
   } catch {
-    return { success: false, error: 'Token inválido', data: null }
+    return { success: false, error: 'Token inválido' }
   }
 }
 
@@ -173,6 +172,5 @@ export async function logoutService(refreshToken: string): Promise<GlobalRespons
   return {
     success: true,
     error: null,
-    data: null,
   }
 }

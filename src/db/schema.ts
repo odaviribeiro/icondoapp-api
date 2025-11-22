@@ -1,8 +1,10 @@
 import {
   boolean,
   date,
+  integer,
   pgEnum,
   pgTable,
+  serial,
   text,
   timestamp,
   uuid,
@@ -68,5 +70,14 @@ export const users = pgTable('users', {
   updated_at: timestamp('updated_at').defaultNow().notNull(),
 })
 
-export const schema = { users, units, blocks, condominiums }
+export const refreshTokens = pgTable('refresh_tokens', {
+  id: serial('id').primaryKey(),
+  userId: uuid('user_id')
+    .notNull()
+    .references(() => users.id, { onDelete: 'cascade' }),
+  token: text('token').notNull(),
+  expiresAt: timestamp('expires_at', { withTimezone: true }).notNull(),
+})
+
+export const schema = { users, units, blocks, condominiums, refreshTokens }
 export type Schema = typeof schema

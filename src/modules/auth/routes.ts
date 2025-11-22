@@ -1,6 +1,12 @@
 import { Hono } from 'hono'
 import { SignUpSchema, SignInSchema } from './dto'
-import { createUser, signinUser } from './service'
+import {
+  createUser,
+  logoutService,
+  meService,
+  refreshTokenService,
+  signinUser,
+} from './service'
 import { authMiddleware } from './middleware'
 import { z } from 'zod'
 import { AuthContext } from './types'
@@ -9,45 +15,84 @@ const auth = new Hono()
 
 auth.post('/signup', async c => {
   const json = await c.req.json()
-  const result = SignUpSchema.safeParse(json)
+  const parsed = SignUpSchema.safeParse(json)
 
-  if (!result.success) {
-    return c.json({ errors: z.treeifyError(result.error) }, 400)
+  if (!parsed.success) {
+    return c.json(
+      {
+        success: false,
+        error: 'Validation error',
+        data: z.treeifyError(parsed.error),
+      },
+      400
+    )
   }
 
-  try {
-    const user = await createUser({
-      name: result.data.name,
-      email: result.data.email,
-      password: result.data.password,
-      birthDate: result.data.birthDate,
-      phone: result.data.phone,
-      acceptedTerms: result.data.acceptedTerms,
-    })
-
-    return c.json({ message: 'User created', user })
-  } catch (err: any) {
-    return c.json({ error: err.message }, 400)
-  }
+  const response = await createUser(parsed.data)
+  return c.json(response, response.success ? 200 : 400)
 })
 
 auth.post('/signin', async c => {
-  const json = await c.req.json()
-  const result = SignInSchema.safeParse(json)
-  if (!result.success) {
-    return c.json({ errors: z.treeifyError(result.error) }, 400)
+  const body = await c.req.json()
+  const parsed = SignInSchema.safeParse(body)
+
+  if (!parsed.success) {
+    return c.json(
+      {
+        success: false,
+        error: 'Validation error',
+        data: z.treeifyError(parsed.error),
+      },
+      400
+    )
   }
 
-  try {
-    const { token } = await signinUser(result.data.email, result.data.password)
-    return c.json({ access_token: token })
-  } catch (err: any) {
-    return c.json({ error: err.message }, 401)
-  }
+  const response = await signinUser(parsed.data.email, parsed.data.password)
+
+  return c.json(response, response.success ? 200 : 401)
 })
 
 auth.get('/me', authMiddleware, async (c: AuthContext) => {
-  return c.json({ user: c.user })
+  const token = c.req.header('Authorization')?.replace('Bearer ', '')
+  const response = await meService(token || '')
+
+  return c.json(response, response.success ? 200 : 401)
+})
+
+auth.post('/refresh', async c => {
+  const { refresh_token } = await c.req.json()
+
+  if (!refresh_token) {
+    return c.json(
+      {
+        success: false,
+        error: 'Missing refresh token',
+        data: null,
+      },
+      400
+    )
+  }
+
+  const response = await refreshTokenService(refresh_token)
+  return c.json(response, response.success ? 200 : 401)
+})
+
+auth.post('/logout', async c => {
+  const { refresh_token } = await c.req.json()
+
+  if (!refresh_token) {
+    return c.json(
+      {
+        success: false,
+        error: 'Missing refresh token',
+        data: null,
+      },
+      400
+    )
+  }
+
+  const response = await logoutService(refresh_token)
+  return c.json(response, 200)
 })
 
 export { auth }

@@ -2,7 +2,7 @@ import type { Context } from 'hono'
 import type { JWTPayload } from 'jose'
 
 export interface AuthContext extends Context {
-  user?: JWTPayload
+  user?: JwtUserPayload
 }
 
 export interface JwtUserPayload extends JWTPayload {
@@ -39,4 +39,7 @@ export type MeData = {
   id: string
   name: string
   email: string
+  phone: string
+  birthDate: string
+  role: string
 }

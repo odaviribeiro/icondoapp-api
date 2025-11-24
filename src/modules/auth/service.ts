@@ -20,7 +20,7 @@ export async function createUser(dto: SignUpDTO): Promise<GlobalResponse<SignUpD
   if (exists) {
     return {
       success: false,
-      error: 'User exists',
+      error: 'USER_ALREADY_EXISTS',
     }
   }
 
@@ -40,7 +40,7 @@ export async function createUser(dto: SignUpDTO): Promise<GlobalResponse<SignUpD
     success: true,
     error: null,
     data: {
-      message: 'Usuário criado com sucesso.',
+      message: 'Success create user.',
       user: {
         name: dto.name,
         email: dto.email,
@@ -58,10 +58,20 @@ export async function signinUser(
     where: eq(users.email, email),
   })
 
-  if (!user) throw new Error('Invalid credentials')
+  if (!user) {
+    return {
+      success: false,
+      error: 'INVALID_CREDENTIALS',
+    }
+  }
 
   const match = await argon2.verify(user.password, password)
-  if (!match) throw new Error('Invalid credentials')
+  if (!match) {
+    return {
+      success: false,
+      error: 'INVALID_CREDENTIALS',
+    }
+  }
 
   const accessToken = await new SignJWT({
     id: user.id,
@@ -89,7 +99,7 @@ export async function signinUser(
     success: true,
     error: null,
     data: {
-      message: 'Login realizado com sucesso',
+      message: 'Login success.',
       tokens: {
         access_token: accessToken,
         refresh_token: refreshToken,
@@ -117,7 +127,7 @@ export async function refreshTokenService(
       where: eq(refreshTokens.token, token),
     })
 
-    if (!stored) return { success: false, error: 'Refresh token inválido' }
+    if (!stored) return { success: false, error: 'Refresh token invalid.' }
 
     const user = await db.query.users.findFirst({
       where: eq(users.id, userId),
@@ -146,17 +156,26 @@ export async function refreshTokenService(
   }
 }
 
-export async function meService(token: string): Promise<GlobalResponse<MeData>> {
+export async function meService(userId: string): Promise<GlobalResponse<MeData>> {
   try {
-    const payload = await jwtVerify(token, accessSecret)
+    const db = getDb()
+
+    const user = await db.query.users.findFirst({
+      where: eq(users.id, userId),
+    })
+
+    if (!user) throw new Error('INVALID_CREDENTIALS')
 
     return {
       success: true,
       error: null,
       data: {
-        id: payload.payload.id as string,
-        name: payload.payload.name as string,
-        email: payload.payload.email as string,
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        phone: user.phone,
+        birthDate: user.birthDate,
+        role: user.role,
       },
     }
   } catch {

@@ -53,9 +53,13 @@ auth.post('/signin', async c => {
 })
 
 auth.get('/me', authMiddleware, async (c: AuthContext) => {
-  const token = c.req.header('Authorization')?.replace('Bearer ', '')
-  const response = await meService(token || '')
+  if (!c.user) {
+    return c.json({ success: false, error: 'INVALID_CREDENTIALS' }, 401)
+  }
 
+  const { id } = c.user
+
+  const response = await meService(id)
   return c.json(response, response.success ? 200 : 401)
 })
 
@@ -66,7 +70,7 @@ auth.post('/refresh', async c => {
     return c.json(
       {
         success: false,
-        error: 'Missing refresh token',
+        error: 'Missing refresh token.',
         data: null,
       },
       400

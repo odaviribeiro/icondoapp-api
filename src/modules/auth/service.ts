@@ -77,6 +77,7 @@ export async function signinUser(
     id: user.id,
     email: user.email,
     name: user.name,
+    role: user.role,
   })
     .setProtectedHeader({ alg: 'HS256' })
     .setExpirationTime('15m')
@@ -107,6 +108,11 @@ export async function signinUser(
       user: {
         name: user.name,
         email: user.email,
+        role: user.role,
+        birthDate: user.birthDate,
+        phone: user.phone,
+        unityId: user.unitId,
+        condominiumId: user.condominiumId,
       },
     },
   }
@@ -139,6 +145,7 @@ export async function refreshTokenService(
       id: user.id,
       email: user.email,
       name: user.name,
+      role: user.role,
     })
       .setProtectedHeader({ alg: 'HS256' })
       .setExpirationTime('15m')

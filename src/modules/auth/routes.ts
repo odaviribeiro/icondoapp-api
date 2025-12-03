@@ -7,7 +7,7 @@ import {
   refreshTokenService,
   signinUser,
 } from './service'
-import { authMiddleware } from './middleware'
+import { isAuthenticated } from './middleware'
 import { z } from 'zod'
 import { AuthContext } from './types'
 
@@ -52,7 +52,7 @@ auth.post('/signin', async c => {
   return c.json(response, response.success ? 200 : 401)
 })
 
-auth.get('/me', authMiddleware, async (c: AuthContext) => {
+auth.get('/me', isAuthenticated, async (c: AuthContext) => {
   if (!c.user) {
     return c.json({ success: false, error: 'INVALID_CREDENTIALS' }, 401)
   }

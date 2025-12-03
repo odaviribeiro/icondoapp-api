@@ -9,6 +9,14 @@ export interface JwtUserPayload extends JWTPayload {
   id: string
   name: string
   email: string
+  role:
+    | 'PENDING'
+    | 'OWNER'
+    | 'TENANT'
+    | 'DEPENDENT'
+    | 'EMPLOYEE'
+    | 'MANAGER'
+    | 'ADMINISTRATOR'
 }
 
 export type SignInData = {
@@ -20,6 +28,11 @@ export type SignInData = {
   user: {
     name: string
     email: string
+    role: string
+    birthDate: string
+    phone: string
+    unityId: string
+    condominiumId: string
   }
 }
 

@@ -1,7 +1,7 @@
+import { relations } from 'drizzle-orm'
 import {
   boolean,
   date,
-  integer,
   pgEnum,
   pgTable,
   serial,
@@ -13,22 +13,43 @@ import {
 
 // ========== ENUMS ==========
 export const userRoleEnum = pgEnum('user_role', [
-  'RESIDENT',
+  'PENDING',
+  'OWNER',
+  'TENANT',
+  'DEPENDENT',
   'EMPLOYEE',
   'MANAGER',
-  'ADMIN',
+  'ADMINISTRATOR',
+  'MASTER',
 ])
 
 // Condominiums
 export const condominiums = pgTable('condominiums', {
   id: uuid('id').primaryKey().defaultRandom(),
-  name: varchar('name', { length: 255 }).notNull(),
+  name: varchar('name', { length: 255 }).notNull().unique(),
   address: text('address').notNull(),
-  cnpj: varchar('cnpj', { length: 18 }),
+  cnpj: varchar('cnpj', { length: 18 }).notNull().unique(),
   createdAt: timestamp('created_at').defaultNow().notNull(),
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
 })
+// Condominiums Infos
+export const condominiumEntities = pgTable('condominium_entities', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  condominiumId: uuid('condominium_id')
+    .references(() => condominiums.id)
+    .notNull(),
 
+  title: varchar('title', { length: 255 }).notNull(),
+  // Portaria 1, Administração, Ronda, Síndico, etc.
+
+  address: text('address'),
+  whatsapp: varchar('whatsapp', { length: 50 }),
+  phone: varchar('phone', { length: 50 }),
+  email: varchar('email', { length: 255 }),
+
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+  updatedAt: timestamp('updated_at').defaultNow().notNull(),
+})
 // Blocks
 export const blocks = pgTable('blocks', {
   id: uuid('id').primaryKey().defaultRandom(),
@@ -59,7 +80,7 @@ export const users = pgTable('users', {
   phone: varchar('phone', { length: 20 }),
   birthDate: date('birth_date'),
   acceptedTerms: boolean('accepted_terms').notNull(),
-  role: userRoleEnum('role').default(null),
+  role: userRoleEnum('role').default('PENDING'),
   unitId: uuid('unit_id')
     .references(() => units.id)
     .default(null),
@@ -78,6 +99,10 @@ export const refreshTokens = pgTable('refresh_tokens', {
   token: text('token').notNull(),
   expiresAt: timestamp('expires_at', { withTimezone: true }).notNull(),
 })
+
+export const condominiumRelations = relations(condominiums, ({ many }) => ({
+  entities: many(condominiumEntities),
+}))
 
 export const schema = { users, units, blocks, condominiums, refreshTokens }
 export type Schema = typeof schema

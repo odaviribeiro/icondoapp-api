@@ -1,0 +1,1 @@
+ALTER TABLE "condominiums" ALTER COLUMN "cnpj" SET NOT NULL;

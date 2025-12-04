@@ -11,11 +11,12 @@ import {
   CondominiumEntityData,
   CreateCondominiumResponse,
   DeleteCondominiumResponse,
+  getCondominiumEntitiesResponse,
   GetCondominiumResponse,
   ListCondominiumsResponse,
   UpdateCondominiumResponse,
 } from './types'
-import { eq } from 'drizzle-orm'
+import { asc, eq } from 'drizzle-orm'
 
 export async function createCondominium(
   dto: CreateCondominiumDto
@@ -178,6 +179,29 @@ export async function updateCondominiumEntity(
     data: {
       message: 'Entity updated successfully.',
       condominium_entitie: updated[0],
+    },
+  }
+}
+
+export async function getCondominiumEntities(
+  id: string
+): Promise<GlobalResponse<getCondominiumEntitiesResponse>> {
+  const db = getDb()
+
+  const entities = await db.query.condominiumEntities.findMany({
+    where: eq(condominiumEntities.condominiumId, id),
+    orderBy: asc(condominiumEntities.order),
+  })
+
+  return {
+    success: true,
+    error: null,
+    data: {
+      condominium_entities: entities.map(e => ({
+        ...e,
+        createdAt: e.createdAt.toISOString(),
+        updatedAt: e.updatedAt.toISOString(),
+      })),
     },
   }
 }

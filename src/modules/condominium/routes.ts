@@ -13,6 +13,7 @@ import {
   createCondominiumEntity,
   deleteCondominium,
   getCondominiumById,
+  getCondominiumEntities,
   listCondominiums,
   removeCondominiumEntity,
   updateCondominium,
@@ -150,3 +151,11 @@ condominium.delete(
     return c.json(response, response.success ? 200 : 400)
   }
 )
+
+condominium.get('/entity/:condominiumId', isAuthenticated, async c => {
+  const condominiumId = c.req.param('condominiumId')
+
+  const response = await getCondominiumEntities(condominiumId)
+
+  return c.json(response, response.success ? 200 : 404)
+})

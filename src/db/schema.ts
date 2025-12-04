@@ -2,6 +2,7 @@ import { relations } from 'drizzle-orm'
 import {
   boolean,
   date,
+  integer,
   pgEnum,
   pgTable,
   serial,
@@ -46,6 +47,8 @@ export const condominiumEntities = pgTable('condominium_entities', {
   whatsapp: varchar('whatsapp', { length: 50 }),
   phone: varchar('phone', { length: 50 }),
   email: varchar('email', { length: 255 }),
+
+  order: integer('order').notNull().default(0),
 
   createdAt: timestamp('created_at').defaultNow().notNull(),
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
@@ -104,5 +107,12 @@ export const condominiumRelations = relations(condominiums, ({ many }) => ({
   entities: many(condominiumEntities),
 }))
 
-export const schema = { users, units, blocks, condominiums, refreshTokens }
+export const schema = {
+  users,
+  units,
+  blocks,
+  condominiums,
+  condominiumEntities,
+  refreshTokens,
+}
 export type Schema = typeof schema

@@ -43,3 +43,18 @@ export interface ListCondominiumsResponse {
 export interface GetCondominiumResponse {
   condominium: CondominiumData
 }
+
+export interface getCondominiumEntitiesResponse {
+  condominium_entities: {
+    id: string
+    condominiumId: string
+    title: string
+    address: string
+    whatsapp: string
+    phone: string
+    email: string
+    order: number
+    createdAt: string
+    updatedAt: string
+  }[]
+}

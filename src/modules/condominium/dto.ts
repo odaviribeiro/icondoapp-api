@@ -26,6 +26,7 @@ export const createEntitySchema = z.object({
   whatsapp: z.string().optional(),
   phone: z.string().optional(),
   email: z.string().optional(),
+  order: z.number().optional(),
 })
 
 export const updateEntitySchema = createEntitySchema
